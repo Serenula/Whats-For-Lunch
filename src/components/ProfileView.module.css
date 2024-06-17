@@ -1,0 +1,25 @@
+.profileListItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.profileName {
+  font-weight: bold;
+}
+
+.profileDetails {
+  margin-top: 5px;
+}
+
+.deleteButton,
+.editButton {
+  margin-left: 10px;
+}

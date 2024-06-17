@@ -1,0 +1,12 @@
+.checkboxGroup {
+  margin-bottom: 10px;
+}
+
+.checkboxGroup label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.checkboxGroup input[type="checkbox"] {
+  margin-right: 5px;
+}
