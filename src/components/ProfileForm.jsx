@@ -27,21 +27,17 @@ const ProfileForm = () => {
       restrictions,
     };
 
-    // Fetch existing profiles from localStorage
     const existingProfiles = JSON.parse(localStorage.getItem("profiles")) || [];
     const profileIndex = existingProfiles.findIndex(
       (p) => p.name === profile.name
     );
 
     if (profileIndex > -1) {
-      // Update existing profile
       existingProfiles[profileIndex] = profile;
     } else {
-      // Add new profile
       existingProfiles.push(profile);
     }
 
-    // Save updated profiles to localStorage
     localStorage.setItem("profiles", JSON.stringify(existingProfiles));
 
     navigate("/profiles");
