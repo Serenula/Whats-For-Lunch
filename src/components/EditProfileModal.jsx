@@ -1,104 +1,95 @@
 import React, { useState, useEffect } from "react";
+import Modal from "./Modal";
+import CheckboxGroup from "./CheckboxGroup";
+import airtableServices from "../services/aritableServices";
 import styles from "./EditProfileModal.module.css";
 
 const EditProfileModal = ({ profile, onSave, onClose }) => {
-  const [profileName, setProfileName] = useState(profile.name);
-  const [allergies, setAllergies] = useState(profile.allergies || []);
-  const [restrictions, setRestrictions] = useState(profile.restrictions || []);
+  const [editedProfile, setEditedProfile] = useState({});
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    setProfileName(profile.name);
-    setAllergies(profile.allergies || []);
-    setRestrictions(profile.restrictions || []);
+    setEditedProfile({ ...profile });
+    setShowModal(true);
   }, [profile]);
 
-  const handleSave = () => {
-    const updatedProfile = {
-      name: profileName,
-      allergies,
-      restrictions,
-    };
-    console.log("Save button clicked, updatedProfile:", updatedProfile);
-    onSave(updatedProfile);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEditedProfile((prevProfile) => ({
+      ...prevProfile,
+      [name]: value,
+    }));
+  };
+
+  const handleCheckboxChange = (name, option, checked) => {
+    setEditedProfile((prevProfile) => ({
+      ...prevProfile,
+      [name]: checked
+        ? [...(prevProfile[name] || []), option]
+        : (prevProfile[name] || []).filter((item) => item !== option),
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const updatedRecords = [
+        {
+          id: editedProfile.id,
+          fields: {
+            Profiles: editedProfile.profiles,
+            Restrictions: editedProfile.restrictions || [],
+          },
+        },
+      ];
+      await airtableServices.updateRecord(updatedRecords);
+      onSave(editedProfile);
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
   };
 
   return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modalContent}>
-        <h2>Edit Profile</h2>
-        <form>
-          <label htmlFor="profileName">Profile Name:</label>
-          <input
-            type="text"
-            id="profileName"
-            value={profileName}
-            onChange={(e) => setProfileName(e.target.value)}
-          />
-          <h3>Allergies</h3>
-          <CheckboxGroup
-            options={[
-              "Nuts",
-              "Crustaceans",
-              "Gluten",
-              "Mushrooms",
-              "Dairy",
-              "Eggs",
-              "Soy",
-            ]}
-            selectedOptions={allergies}
-            onChange={(option, checked) => {
-              setAllergies((prevAllergies) =>
-                checked
-                  ? [...prevAllergies, option]
-                  : prevAllergies.filter((a) => a !== option)
-              );
-            }}
-          />
-          <h3>Dietary Restrictions</h3>
-          <CheckboxGroup
-            options={[
-              "Halal",
-              "Kosher",
-              "Keto",
-              "Vegan",
-              "Vegetarian",
-              "Pescatarian",
-              "Hindu/Buddhist",
-            ]}
-            selectedOptions={restrictions}
-            onChange={(option, checked) => {
-              setRestrictions((prevRestrictions) =>
-                checked
-                  ? [...prevRestrictions, option]
-                  : prevRestrictions.filter((r) => r !== option)
-              );
-            }}
-          />
-        </form>
-        <button type="button" onClick={handleSave}>
-          Save
-        </button>
-        <button type="button" onClick={onClose}>
-          Cancel
-        </button>
-      </div>
-    </div>
+    <>
+      {showModal && (
+        <Modal onClose={() => setShowModal(false)}>
+          <h2>Edit Profile</h2>
+          <form onSubmit={handleSubmit}>
+            <label htmlFor="profiles">Profile:</label>
+            <input
+              type="text"
+              id="profiles"
+              name="profiles"
+              value={editedProfile.profiles || ""}
+              onChange={handleChange}
+              required
+            />
+            <h3>Dietary Restrictions</h3>
+            <CheckboxGroup
+              options={["Halal", "Kosher", "Vegan", "Vegetarian"]}
+              selectedOptions={editedProfile.restrictions || []}
+              onChange={(option, checked) =>
+                handleCheckboxChange("restrictions", option, checked)
+              }
+            />
+            <div className={styles.modalButtons}>
+              <button type="submit" className={styles.saveButton}>
+                Save Changes
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className={styles.cancelButton}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+    </>
   );
 };
-
-const CheckboxGroup = ({ options, selectedOptions, onChange }) => (
-  <div className={styles.checkboxGroup}>
-    {options.map((option) => (
-      <label key={option}>
-        <input
-          type="checkbox"
-          checked={selectedOptions.includes(option)}
-          onChange={(e) => onChange(option, e.target.checked)}
-        />
-        {option}
-      </label>
-    ))}
-  </div>
-);
 
 export default EditProfileModal;

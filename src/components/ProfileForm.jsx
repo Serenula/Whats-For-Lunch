@@ -1,56 +1,57 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styles from "./ProfileForm.module.css";
 import CheckboxGroup from "./CheckboxGroup";
+import airtableServices from "../services/aritableServices";
 
-const ProfileForm = () => {
-  const [profileName, setProfileName] = useState("");
-  const [allergies, setAllergies] = useState([]);
+const ProfileForm = ({ location }) => {
+  const [profiles, setProfiles] = useState("");
   const [restrictions, setRestrictions] = useState([]);
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     if (location && location.state && location.state.profile) {
-      const { name, allergies, restrictions } = location.state.profile;
-      setProfileName(name);
-      setAllergies(allergies);
-      setRestrictions(restrictions);
+      const { Profiles, Restrictions } = location.state.profile;
+      setProfiles(Profiles);
+      setRestrictions(Restrictions || []);
     }
   }, [location]);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+
     const profile = {
-      name: profileName,
-      allergies,
-      restrictions,
+      Profiles: profiles,
+      Restrictions: restrictions,
     };
 
-    const existingProfiles = JSON.parse(localStorage.getItem("profiles")) || [];
-    const profileIndex = existingProfiles.findIndex(
-      (p) => p.name === profile.name
-    );
+    try {
+      let response;
+      if (location && location.state && location.state.profile) {
+        const { id } = location.state.profile;
+        response = await airtableServices.updateRecord(id, profile);
+      } else {
+        response = await airtableServices.createRecord(profile);
+      }
 
-    if (profileIndex > -1) {
-      existingProfiles[profileIndex] = profile;
-    } else {
-      existingProfiles.push(profile);
+      console.log("Profile saved successfully:", response);
+      navigate("/profiles");
+    } catch (error) {
+      console.error("Error saving profile:", error);
     }
-
-    localStorage.setItem("profiles", JSON.stringify(existingProfiles));
-
-    navigate("/profiles");
   };
 
-  const handleDelete = () => {
-    const existingProfiles = JSON.parse(localStorage.getItem("profiles")) || [];
-    const updatedProfiles = existingProfiles.filter(
-      (profile) => profile.name !== profileName
-    );
-
-    localStorage.setItem("profiles", JSON.stringify(updatedProfiles));
-    navigate("/profiles");
+  const handleDelete = async () => {
+    try {
+      if (location && location.state && location.state.profile) {
+        const { id } = location.state.profile;
+        await airtableServices.deleteRecord(id);
+        console.log("Profile deleted successfully");
+        navigate("/profiles");
+      }
+    } catch (error) {
+      console.error("Error deleting profile:", error);
+    }
   };
 
   return (
@@ -64,44 +65,16 @@ const ProfileForm = () => {
         <button onClick={handleDelete}>Delete</button>
       )}
       <form onSubmit={handleSubmit}>
-        <label htmlFor="profileName">Profile Name:</label>
+        <label htmlFor="profiles">Profile:</label>
         <input
           type="text"
-          id="profileName"
-          value={profileName}
-          onChange={(e) => setProfileName(e.target.value)}
-        />
-        <h3>Allergies</h3>
-        <CheckboxGroup
-          options={[
-            "Nuts",
-            "Crustaceans",
-            "Gluten",
-            "Mushrooms",
-            "Dairy",
-            "Eggs",
-            "Soy",
-          ]}
-          selectedOptions={allergies}
-          onChange={(option, checked) => {
-            setAllergies((prevAllergies) =>
-              checked
-                ? [...prevAllergies, option]
-                : prevAllergies.filter((a) => a !== option)
-            );
-          }}
+          id="profiles"
+          value={profiles}
+          onChange={(e) => setProfiles(e.target.value)}
         />
         <h3>Dietary Restrictions</h3>
         <CheckboxGroup
-          options={[
-            "Halal",
-            "Kosher",
-            "Keto",
-            "Vegan",
-            "Vegetarian",
-            "Pescatarian",
-            "Hindu/Buddhist",
-          ]}
+          options={["Halal", "Kosher", "Vegan", "Vegetarian"]}
           selectedOptions={restrictions}
           onChange={(option, checked) => {
             setRestrictions((prevRestrictions) =>
