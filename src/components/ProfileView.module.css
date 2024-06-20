@@ -33,31 +33,34 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
+  padding: 15px;
   border-bottom: 1px solid #ccc;
   cursor: pointer;
   width: 100%;
 }
 
 .selectedProfile {
-  background-color: #e0f7fa;
-  border-left: 5px solid #4caf50;
+  background-color: #ffe5ca;
+  border-left: 5px solid #e2a165;
 }
 
 .profileName {
   font-weight: bold;
+  font-size: 1.2rem;
 }
 
 .profileDetails {
   margin-top: 5px;
+  font-size: 0.9rem;
+  color: #666666;
 }
 
 .deleteButton,
 .editButton,
 .getDirectionsBtn,
 .getDetailsBtn {
-  padding: 8px 16px;
-  font-size: 0.9rem;
+  padding: 10px 20px;
+  font-size: 1rem;
   cursor: pointer;
   border: none;
   border-radius: 4px;
@@ -74,18 +77,18 @@
 }
 
 .editButton {
-  background-color: #4caf50;
+  background-color: #e2a165;
   color: white;
 }
 
 .editButton:hover {
-  background-color: #45a049;
+  background-color: #d08e55;
 }
 
 .getDirectionsBtn,
 .getDetailsBtn {
-  background-color: #4285f4;
-  color: #ffffff;
+  background-color: #e2a165;
+  color: black;
 }
 
 .getDirectionsBtn:hover,
@@ -159,11 +162,12 @@
 }
 
 .selectedPlace p {
+  font-size: 1rem;
   margin-bottom: 8px;
 }
 
 .selectedPlace a {
-  color: #4285f4;
+  color: #e2a165;
   text-decoration: none;
 }
 
@@ -194,6 +198,7 @@
 }
 
 .reviewItem p {
+  font-size: 0.9rem;
   margin-bottom: 5px;
 }
 
@@ -217,7 +222,7 @@
 }
 
 .modal {
-  background-color: #fff;
+  background-color: #e2a165;
   padding: 20px;
   border-radius: 8px;
   width: 80%;
@@ -227,29 +232,47 @@
   overflow-y: auto;
 }
 
+.priceLevelSelector {
+  margin-bottom: 10px;
+}
+
+.getDirectionsBtn {
+  margin-right: 10px;
+}
+
 @media (max-width: 768px) {
   .profileViewContainer {
     flex-direction: column;
   }
 }
 
-/* Styling for travel mode selection */
-.travelModeSelection {
+.travelModeContainer {
   margin-top: 20px;
 }
 
+.travelModeContainer h3 {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+}
+
 .travelModeBtn {
-  padding: 12px 20px;
+  padding: 12px 24px;
   font-size: 1rem;
   cursor: pointer;
-  background-color: #4285f4;
-  color: #ffffff;
   border: none;
   border-radius: 4px;
-  margin-right: 10px;
   transition: background-color 0.3s ease;
+  margin-right: 10px;
+  background-color: #f0f0f0;
+  color: #333333;
+}
+
+.travelModeBtn.active {
+  background-color: #2c70dd;
+  color: white;
 }
 
 .travelModeBtn:hover {
-  background-color: #2c70dd;
+  background-color: #d8d8d8;
+  color: #333333;
 }

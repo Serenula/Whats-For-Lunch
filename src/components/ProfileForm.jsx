@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./ProfileForm.module.css";
 import CheckboxGroup from "./CheckboxGroup";
-import airtableServices from "../services/aritableServices";
+import airtableServices from "../services/airtableServices";
 
 const ProfileForm = ({ location }) => {
   const [profiles, setProfiles] = useState("");

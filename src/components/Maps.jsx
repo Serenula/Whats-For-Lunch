@@ -25,6 +25,7 @@ const Maps = ({ restrictions }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedTravelMode, setSelectedTravelMode] = useState(null);
   const [travelDurations, setTravelDurations] = useState({});
+  const [selectedPriceLevel, setSelectedPriceLevel] = useState("");
   const mapRef = useRef(null);
   const currLocMarkerRef = useRef(null);
 
@@ -66,23 +67,31 @@ const Maps = ({ restrictions }) => {
           }
         );
       }
-
-      mapInstance.addListener("tilesloaded", () => {
-        if (restrictions && restrictions.length > 0) {
-          fetchPlaces(mapInstance, restrictions);
-        }
-      });
     };
 
     loadMap();
-  }, [restrictions]);
+  }, []);
 
-  const fetchPlaces = async (map, restrictions) => {
+  useEffect(() => {
+    if (isLoaded && currLoc && restrictions && restrictions.length > 0) {
+      fetchPlaces(map, restrictions, currLoc);
+    }
+  }, [isLoaded, currLoc, restrictions, selectedPriceLevel]);
+
+  const fetchPlaces = async (map, restrictions, location) => {
     const service = new google.maps.places.PlacesService(map);
     const request = {
+      location,
+      radius: "1000", // 1 km radius
       query: restrictions.join(" OR "),
-      fields: ["name", "geometry", "vicinity", "place_id"],
+      fields: ["name", "geometry", "vicinity", "place_id", "price_level"],
     };
+
+    if (selectedPriceLevel) {
+      request.minPriceLevel = selectedPriceLevel;
+      request.maxPriceLevel = selectedPriceLevel;
+    }
+
     try {
       const results = await new Promise((resolve, reject) => {
         service.textSearch(request, (results, status) => {
@@ -131,6 +140,7 @@ const Maps = ({ restrictions }) => {
         "rating",
         "photos",
         "reviews",
+        "price_level",
       ],
     };
     try {
@@ -161,7 +171,7 @@ const Maps = ({ restrictions }) => {
     const request = {
       origin: currLoc,
       destination: place.geometry.location,
-      travelMode: google.maps.TravelMode.WALKING,
+      travelMode: google.maps.TravelMode.WALKING, // Default to walking
     };
 
     directionsService.route(request, (result, status) => {
@@ -202,6 +212,10 @@ const Maps = ({ restrictions }) => {
     setShowModal(false);
   };
 
+  const handlePriceLevelChange = (e) => {
+    setSelectedPriceLevel(e.target.value);
+  };
+
   const handleTravelModeSelect = (travelMode) => {
     setSelectedTravelMode(travelMode);
 
@@ -239,6 +253,21 @@ const Maps = ({ restrictions }) => {
     setShowModal(false);
   };
 
+  const priceLevelToString = (level) => {
+    switch (level) {
+      case 0:
+        return "$ (Inexpensive)";
+      case 1:
+        return "$$ (Moderate)";
+      case 2:
+        return "$$$ (Expensive)";
+      case 3:
+        return "$$$$ (Very Expensive)";
+      default:
+        return "Unknown";
+    }
+  };
+
   return (
     <div className={styles.mapsContainer}>
       <div
@@ -251,6 +280,21 @@ const Maps = ({ restrictions }) => {
         <h3 className={styles.placesHeader}>Current Location</h3>
         {currAddress ? <p>{currAddress}</p> : <p>Loading current address...</p>}
         <h3 className={styles.placesHeader}>Places</h3>
+        {/* Price level selector */}
+        <div className={styles.priceLevelSelector}>
+          <label htmlFor="priceLevel">Price Level:</label>
+          <select
+            id="priceLevel"
+            value={selectedPriceLevel}
+            onChange={handlePriceLevelChange}
+          >
+            <option value="">All</option>
+            <option value="0">{priceLevelToString(0)}</option>
+            <option value="1">{priceLevelToString(1)}</option>
+            <option value="2">{priceLevelToString(2)}</option>
+            <option value="3">{priceLevelToString(3)}</option>
+          </select>
+        </div>
         <ul className={styles.placesList}>
           {places.map((place, index) => (
             <li key={index} className={styles.placeItem}>
@@ -273,91 +317,89 @@ const Maps = ({ restrictions }) => {
             </li>
           ))}
         </ul>
-        {showModal && selectedPlace && (
-          <Modal onClose={closeModal}>
-            <div className={styles.modalContent}>
-              <h3>{selectedPlace.name}</h3>
-              <p>{selectedPlace.formatted_address}</p>
-              {selectedPlace.formatted_phone_number && (
-                <p>Phone: {selectedPlace.formatted_phone_number}</p>
-              )}
-              {selectedPlace.rating && <p>Rating: {selectedPlace.rating}</p>}
-              {selectedPlace.website && (
-                <p>
-                  Website:{" "}
-                  <a
-                    href={selectedPlace.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedPlace.website}
-                  </a>
-                </p>
-              )}
-              {selectedPlace.photos && (
-                <div className={styles.photosContainer}>
-                  {selectedPlace.photos.map((photo, index) => (
-                    <img
-                      key={index}
-                      src={photo.getUrl()}
-                      alt={`Photo ${index}`}
-                      className={styles.placePhoto}
-                    />
-                  ))}
-                </div>
-              )}
-              {selectedPlace.reviews && (
-                <div className={styles.reviewsContainer}>
-                  <h4>Reviews</h4>
-                  {selectedPlace.reviews.map((review, index) => (
-                    <div key={index} className={styles.reviewItem}>
-                      <p>{review.text}</p>
-                      <p>Rating: {review.rating}</p>
-                      <p>Author: {review.author_name}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {selectedTravelMode && (
-                <div className={styles.travelTimes}>
-                  <h4>Travel Times:</h4>
-                  <p>Walking: {travelDurations.walking}</p>
-                  <p>Driving: {travelDurations.driving}</p>
-                  <p>Public Transport: {travelDurations.transit}</p>
-                </div>
-              )}
-
-              <div className={styles.travelModeSelection}>
-                <h4>Select Travel Mode:</h4>
-                <button
-                  className={styles.travelModeBtn}
-                  onClick={() =>
-                    handleTravelModeSelect(google.maps.TravelMode.WALKING)
-                  }
-                >
-                  Walking
-                </button>
-                <button
-                  className={styles.travelModeBtn}
-                  onClick={() =>
-                    handleTravelModeSelect(google.maps.TravelMode.DRIVING)
-                  }
-                >
-                  Driving
-                </button>
-                <button
-                  className={styles.travelModeBtn}
-                  onClick={() =>
-                    handleTravelModeSelect(google.maps.TravelMode.TRANSIT)
-                  }
-                >
-                  Public Transport
-                </button>
-              </div>
-            </div>
-          </Modal>
-        )}
       </div>
+      {showModal && selectedPlace && (
+        <Modal onClose={closeModal}>
+          <h2>{selectedPlace.name}</h2>
+          <p>{selectedPlace.formatted_address}</p>
+          {selectedPlace.formatted_phone_number && (
+            <p>Phone: {selectedPlace.formatted_phone_number}</p>
+          )}
+          {selectedPlace.website && (
+            <p>
+              Website:{" "}
+              <a href={selectedPlace.website}>{selectedPlace.website}</a>
+            </p>
+          )}
+          {selectedPlace.rating && <p>Rating: {selectedPlace.rating} / 5</p>}
+          {selectedPlace.price_level && (
+            <p>Price Level: {priceLevelToString(selectedPlace.price_level)}</p>
+          )}
+          {selectedPlace.photos && selectedPlace.photos.length > 0 && (
+            <div>
+              {selectedPlace.photos.map((photo, index) => (
+                <img
+                  key={index}
+                  src={photo.getUrl()}
+                  alt={`${selectedPlace.name} photo ${index + 1}`}
+                  className={styles.placePhoto}
+                />
+              ))}
+            </div>
+          )}
+          {selectedPlace.reviews && selectedPlace.reviews.length > 0 && (
+            <div>
+              <h3>Reviews:</h3>
+              <ul>
+                {selectedPlace.reviews.map((review, index) => (
+                  <li key={index}>
+                    <strong>{review.author_name}:</strong> {review.text}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className={styles.travelModeContainer}>
+            <h3>Select Travel Mode:</h3>
+            <button
+              className={`${styles.travelModeBtn} ${
+                selectedTravelMode === google.maps.TravelMode.WALKING
+                  ? "active"
+                  : ""
+              }`}
+              onClick={() =>
+                handleTravelModeSelect(google.maps.TravelMode.WALKING)
+              }
+            >
+              Walking ({travelDurations.walking})
+            </button>
+            <button
+              className={`${styles.travelModeBtn} ${
+                selectedTravelMode === google.maps.TravelMode.DRIVING
+                  ? "active"
+                  : ""
+              }`}
+              onClick={() =>
+                handleTravelModeSelect(google.maps.TravelMode.DRIVING)
+              }
+            >
+              Driving ({travelDurations.driving})
+            </button>
+            <button
+              className={`${styles.travelModeBtn} ${
+                selectedTravelMode === google.maps.TravelMode.TRANSIT
+                  ? "active"
+                  : ""
+              }`}
+              onClick={() =>
+                handleTravelModeSelect(google.maps.TravelMode.TRANSIT)
+              }
+            >
+              Transit ({travelDurations.transit})
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

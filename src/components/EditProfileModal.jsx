@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
 import CheckboxGroup from "./CheckboxGroup";
-import airtableServices from "../services/aritableServices";
+import airtableServices from "../services/airtableServices";
 import styles from "./EditProfileModal.module.css";
 
 const EditProfileModal = ({ profile, onSave, onClose }) => {

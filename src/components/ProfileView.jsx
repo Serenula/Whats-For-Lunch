@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "./ProfileView.module.css";
-import airtableServices from "../services/aritableServices";
+import airtableServices from "../services/airtableServices";
 import EditProfileModal from "./EditProfileModal";
 import Maps from "./Maps";
 

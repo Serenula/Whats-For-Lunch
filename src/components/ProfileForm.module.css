@@ -1,42 +1,59 @@
 .profileForm {
   max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
+  margin: 20px;
+  padding: 30px;
   border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .profileForm h2 {
+  font-size: 1.8rem;
   margin-top: 0;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333333;
 }
 
 .profileForm label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+  color: #555555;
 }
 
 .profileForm input[type="text"],
 .profileForm input[type="submit"],
 .profileForm button {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
+  padding: 12px;
+  margin-bottom: 15px;
   border: 1px solid #ccc;
-  border-radius: 3px;
-  background-color: #fff;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  font-size: 1rem;
+  color: #333333;
+  box-sizing: border-box;
 }
 
 .profileForm input[type="checkbox"] {
-  margin-right: 5px;
+  margin-right: 8px;
 }
 
 .profileForm button[type="submit"] {
-  background-color: #007bff;
-  color: #fff;
+  background-color: #e2a165;
+  color: #333333;
   cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  padding: 12px 20px;
+  transition: background-color 0.3s ease;
 }
 
 .profileForm button[type="submit"]:hover {
-  background-color: #0056b3;
+  background-color: #d08e55;
 }

@@ -1,12 +1,12 @@
 .modalButtons {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-top: 20px;
 }
 
 .saveButton,
 .cancelButton {
-  padding: 10px 20px;
+  padding: 12px 24px;
   font-size: 1rem;
   cursor: pointer;
   border: none;
@@ -15,19 +15,20 @@
 }
 
 .saveButton {
-  background-color: #4caf50;
+  background-color: #e2a165;
   color: #ffffff;
 }
 
 .saveButton:hover {
-  background-color: #45a049;
+  background-color: #d08e55;
 }
 
 .cancelButton {
-  background-color: #f44336;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #e2a165;
+  border: 1px solid #e2a165;
 }
 
 .cancelButton:hover {
-  background-color: #dd3333;
+  background-color: #f0f0f0;
 }
