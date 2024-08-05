@@ -1,7 +1,6 @@
 # ProjectTwo
 
 ![Intro Page](/app%20cover.png)
-Link to game : https://serenula.github.io/ProjectTwo/
 
 ## About my app:
 
